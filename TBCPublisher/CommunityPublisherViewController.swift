@@ -26,8 +26,8 @@ final class CommunityPublisherViewController: UIViewController {
     }()
     
     /// The object that manages autocomplete
-    lazy var autocompleteManager: AutocompleteManager = { [unowned self] in
-        let manager = AutocompleteManager(for: self.textView)
+    lazy var autocompleteManager: CommunityAutoCompletionManager = { [unowned self] in
+        let manager = CommunityAutoCompletionManager(for: self.textView)
         manager.delegate = self
         manager.dataSource = self
         return manager
