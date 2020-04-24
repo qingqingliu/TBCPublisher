@@ -225,6 +225,7 @@ extension CommunityPublisherViewController: UIImagePickerControllerDelegate, UIN
 
 extension CommunityPublisherViewController: CommunityInputBarDelegate {
     func canAddAttachmentToInputBar(inputBar: CommunityInputBar) -> Bool {
-        self.attachmentManager.attachments.count < 1
+        // support up to 3 attachment
+        self.attachmentManager.attachments.count < 3
     }
 }
