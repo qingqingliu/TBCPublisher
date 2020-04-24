@@ -6,7 +6,6 @@
 //  Copyright © 2020 Nathan Tannar. All rights reserved.
 //
 
-
 import Foundation
 import InputBarAccessoryView
 import UIKit
@@ -15,7 +14,7 @@ final class CommunityPublisherViewController: UIViewController {
     // MARK: - Properties
     
     private let conversation: SampleData.Conversation
-    private let inputBar: InputBarAccessoryView
+    private let inputBar: CommunityInputBar
     private var keyboardManager = KeyboardManager()
     
     /// The object that manages attachments
@@ -56,6 +55,7 @@ final class CommunityPublisherViewController: UIViewController {
         self.conversation = conversation
         self.inputBar = CommunityInputBar()
         super.init(nibName: nil, bundle: nil)
+        self.inputBar.attachmentInputDelegate = self
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -75,16 +75,17 @@ final class CommunityPublisherViewController: UIViewController {
         
         view.addSubview(textView)
         NSLayoutConstraint.activate([
-                  textView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-                  textView.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor),
-                  textView.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor),
-                  textView.bottomAnchor.constraint(equalTo: self.inputBar.topAnchor)
-               ])
+            textView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+            textView.leftAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leftAnchor),
+            textView.rightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.rightAnchor),
+            textView.bottomAnchor.constraint(equalTo: self.inputBar.topAnchor)
+        ])
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.5) {
             self.textView.becomeFirstResponder()
         }
         
         // Configure AutocompleteManager
+        autocompleteManager.defaultTextAttributes = [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.green]
         autocompleteManager.register(prefix: "@", with: [.font: UIFont.preferredFont(forTextStyle: .body),.foregroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 1),.backgroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 0.1)])
         autocompleteManager.register(prefix: "#")
         autocompleteManager.maxSpaceCountDuringCompletion = 1 // Allow for autocompletes with a space
@@ -104,7 +105,7 @@ extension CommunityPublisherViewController: AttachmentManagerDelegate {
     func attachmentManager(_ manager: AttachmentManager, shouldBecomeVisible: Bool) {
         setAttachmentManager(active: shouldBecomeVisible)
     }
-                                      
+    
     func attachmentManager(_ manager: AttachmentManager, didReloadTo attachments: [AttachmentManager.Attachment]) {
         inputBar.sendButton.isEnabled = manager.attachments.count > 0
     }
@@ -115,6 +116,16 @@ extension CommunityPublisherViewController: AttachmentManagerDelegate {
     
     func attachmentManager(_ manager: AttachmentManager, didRemove attachment: AttachmentManager.Attachment, at index: Int) {
         inputBar.sendButton.isEnabled = manager.attachments.count > 0
+    }
+    
+    func attachmentManager(_ manager: AttachmentManager, didSelectAddAttachmentAt index: Int) {
+        let canShow = self.canAddAttachmentToInputBar(inputBar: self.inputBar)
+        if canShow {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = .photoLibrary
+            present(imagePicker, animated: true, completion: nil)
+        }
     }
     
     // MARK: - AttachmentManagerDelegate Helper
@@ -187,12 +198,33 @@ extension CommunityPublisherViewController: AutocompleteManagerDelegate, Autocom
     func setAutocompleteManager(active: Bool) {
         let topStackView = inputBar.topStackView
         if active, !topStackView.arrangedSubviews.contains(autocompleteManager.tableView) {
-             topStackView.insertArrangedSubview(autocompleteManager.tableView, at: 0)
+            topStackView.insertArrangedSubview(autocompleteManager.tableView, at: 0)
             topStackView.layoutIfNeeded()
         } else if !active, topStackView.arrangedSubviews.contains(autocompleteManager.tableView) {
             topStackView.removeArrangedSubview(autocompleteManager.tableView)
             topStackView.layoutIfNeeded()
         }
         inputBar.invalidateIntrinsicContentSize()
+    }
+}
+
+extension CommunityPublisherViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        let info = Dictionary(uniqueKeysWithValues: info.map { key, value in (key.rawValue, value) })
+        
+        dismiss(animated: true, completion: {
+            if let pickedImage = info[UIImagePickerController.InfoKey.originalImage.rawValue] as? UIImage {
+                let handled = self.attachmentManager.handleInput(of: pickedImage)
+                if !handled {
+                    // throw error
+                }
+            }
+        })
+    }
+}
+
+extension CommunityPublisherViewController: CommunityInputBarDelegate {
+    func canAddAttachmentToInputBar(inputBar: CommunityInputBar) -> Bool {
+        self.attachmentManager.attachments.count < 1
     }
 }

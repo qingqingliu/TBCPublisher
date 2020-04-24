@@ -12,7 +12,12 @@ import Foundation
 import UIKit
 import InputBarAccessoryView
 
+protocol CommunityInputBarDelegate: AnyObject {
+    func canAddAttachmentToInputBar(inputBar: CommunityInputBar) -> Bool
+}
+
 class CommunityInputBar: InputBarAccessoryView {
+    weak var attachmentInputDelegate: CommunityInputBarDelegate?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,10 +43,13 @@ class CommunityInputBar: InputBarAccessoryView {
             makeButton(named: "ic_library")
                 .onSelected {
                     $0.tintColor = UIColor(red: 15/255, green: 135/255, blue: 255/255, alpha: 1.0)
-                    let imagePicker = UIImagePickerController()
-                    imagePicker.delegate = self
-                    imagePicker.sourceType = .photoLibrary
-                    (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                    let canShow = self.attachmentInputDelegate?.canAddAttachmentToInputBar(inputBar: self) ?? true
+                    if (canShow) {
+                        let imagePicker = UIImagePickerController()
+                        imagePicker.delegate = self
+                        imagePicker.sourceType = .photoLibrary
+                        (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                    }
             }
         ]
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
@@ -49,11 +57,14 @@ class CommunityInputBar: InputBarAccessoryView {
                 button.isEnabled = textView.text.isEmpty
                 }.onSelected {
                     $0.tintColor = UIColor(red: 15/255, green: 135/255, blue: 255/255, alpha: 1.0)
-                    let imagePicker = UIImagePickerController()
-                    
-                    imagePicker.delegate = self
-                    imagePicker.sourceType = .camera
-                    (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                    let canShow = self.attachmentInputDelegate?.canAddAttachmentToInputBar(inputBar: self) ?? true
+                    if (canShow) {
+                        let imagePicker = UIImagePickerController()
+                        
+                        imagePicker.delegate = self
+                        imagePicker.sourceType = .camera
+                        (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                    }
             }, at: 0)
         }
         items.forEach { $0.tintColor = .lightGray }
@@ -93,24 +104,11 @@ class CommunityInputBar: InputBarAccessoryView {
 extension CommunityInputBar: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-// Local variable inserted by Swift 4.2 migrator.
-let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
-
-        
+        let info =  Dictionary(uniqueKeysWithValues: info.map { key, value in (key.rawValue, value) })
         picker.dismiss(animated: true, completion: {
-            if let pickedImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.originalImage)] as? UIImage {
+            if let pickedImage = info[UIImagePickerController.InfoKey.originalImage.rawValue] as? UIImage {
                 self.inputPlugins.forEach { _ = $0.handleInput(of: pickedImage) }
             }
         })
     }
-}
-
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
-    return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
-}
-
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
-    return input.rawValue
 }
