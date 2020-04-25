@@ -85,7 +85,6 @@ final class CommunityPublisherViewController: UIViewController {
         }
         
         // Configure AutocompleteManager
-        autocompleteManager.defaultTextAttributes = [.font: UIFont.preferredFont(forTextStyle: .body), .foregroundColor: UIColor.green]
         autocompleteManager.register(prefix: "@", with: [.font: UIFont.preferredFont(forTextStyle: .body),.foregroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 1),.backgroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 0.1)])
         autocompleteManager.register(prefix: "#")
         autocompleteManager.maxSpaceCountDuringCompletion = 1 // Allow for autocompletes with a space
