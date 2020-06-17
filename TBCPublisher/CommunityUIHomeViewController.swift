@@ -41,6 +41,9 @@ class CommunityUIHomeViewController: UITableViewController {
         if indexPath.row == 1 {
             let navController = UINavigationController(rootViewController: CommunityPublisherViewController(conversation: convo))
             present(navController, animated: true, completion: nil)
+        } else {
+            let vc = CommunityFeedsViewController(conversation: convo)
+            navigationController?.pushViewController(vc, animated: true)
         }
     }
 }

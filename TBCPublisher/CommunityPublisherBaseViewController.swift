@@ -34,7 +34,7 @@ open class CommunityPublisherBaseViewController: UIViewController {
     
     /// The object that manages autocomplete
     lazy var autocompleteManager: CommunityAutoCompletionManager = { [unowned self] in
-        let manager = CommunityAutoCompletionManager(for: self.textView)
+        let manager = CommunityAutoCompletionManager(for: self.textViewForAutoCompletion())
         manager.delegate = self
         manager.dataSource = self
         return manager
@@ -51,9 +51,9 @@ open class CommunityPublisherBaseViewController: UIViewController {
     // Completions loaded async that get appeneded to local cached completions
     var asyncCompletions: [AutocompleteCompletion] = []
     
-    init(conversation: SampleData.Conversation) {
+    init(conversation: SampleData.Conversation,inputBarStyle: Bool) {
         self.conversation = conversation
-        self.inputBar = CommunityInputBar()
+        self.inputBar = CommunityInputBar(inputBarStyle: inputBarStyle)
         super.init(nibName: nil, bundle: nil)
         inputBar.parentController = self
         inputBar.attachmentInputDelegate = self
@@ -72,6 +72,10 @@ open class CommunityPublisherBaseViewController: UIViewController {
         
         // Set plugins
         inputBar.inputPlugins = [autocompleteManager, attachmentManager]
+    }
+    
+    open func textViewForAutoCompletion() -> UITextView {
+        return self.textView
     }
 }
 
