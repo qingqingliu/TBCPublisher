@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		101E1FEF249A6EB600EA02EA /* CommunityUIHomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101E1FEE249A6EB600EA02EA /* CommunityUIHomeViewController.swift */; };
+		101E1FF1249A771C00EA02EA /* CommunityPublisherBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101E1FF0249A771C00EA02EA /* CommunityPublisherBaseViewController.swift */; };
 		108D292E2453589500743395 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108D292D2453589500743395 /* AppDelegate.swift */; };
 		108D29322453589500743395 /* CommunityPublisherViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 108D29312453589500743395 /* CommunityPublisherViewController.swift */; };
 		108D29372453589600743395 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 108D29362453589600743395 /* Assets.xcassets */; };
@@ -20,6 +22,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		101E1FEE249A6EB600EA02EA /* CommunityUIHomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityUIHomeViewController.swift; sourceTree = "<group>"; };
+		101E1FF0249A771C00EA02EA /* CommunityPublisherBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityPublisherBaseViewController.swift; sourceTree = "<group>"; };
 		108D292A2453589500743395 /* TBCPublisher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TBCPublisher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		108D292D2453589500743395 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		108D29312453589500743395 /* CommunityPublisherViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityPublisherViewController.swift; sourceTree = "<group>"; };
@@ -67,8 +71,10 @@
 			isa = PBXGroup;
 			children = (
 				108D292D2453589500743395 /* AppDelegate.swift */,
-				108D29312453589500743395 /* CommunityPublisherViewController.swift */,
 				108D29582453939C00743395 /* CommunityAutoCompletionManager.swift */,
+				101E1FEE249A6EB600EA02EA /* CommunityUIHomeViewController.swift */,
+				108D29312453589500743395 /* CommunityPublisherViewController.swift */,
+				101E1FF0249A771C00EA02EA /* CommunityPublisherBaseViewController.swift */,
 				108D294724535B2A00743395 /* CommunityInputBar.swift */,
 				108D29362453589600743395 /* Assets.xcassets */,
 				108D29382453589600743395 /* LaunchScreen.storyboard */,
@@ -191,6 +197,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				108D294824535B2A00743395 /* CommunityInputBar.swift in Sources */,
+				101E1FF1249A771C00EA02EA /* CommunityPublisherBaseViewController.swift in Sources */,
+				101E1FEF249A6EB600EA02EA /* CommunityUIHomeViewController.swift in Sources */,
 				108D294F24535B6A00743395 /* SampleData.swift in Sources */,
 				108D294E24535B6A00743395 /* Lorem.swift in Sources */,
 				108D29592453939C00743395 /* CommunityAutoCompletionManager.swift in Sources */,

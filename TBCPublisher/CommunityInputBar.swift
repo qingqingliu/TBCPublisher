@@ -18,6 +18,7 @@ protocol CommunityInputBarDelegate: AnyObject {
 
 class CommunityInputBar: InputBarAccessoryView {
     weak var attachmentInputDelegate: CommunityInputBarDelegate?
+    weak var parentController: UIViewController?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -28,7 +29,6 @@ class CommunityInputBar: InputBarAccessoryView {
         fatalError("init(coder:) has not been implemented")
     }
 
-    
     func configure() {
         var items = [
             makeButton(named: "ic_at").onSelected {
@@ -48,7 +48,7 @@ class CommunityInputBar: InputBarAccessoryView {
                         let imagePicker = UIImagePickerController()
                         imagePicker.delegate = self
                         imagePicker.sourceType = .photoLibrary
-                        (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                        self.parentController?.present(imagePicker, animated: true, completion: nil)
                     }
             }
         ]
@@ -63,7 +63,7 @@ class CommunityInputBar: InputBarAccessoryView {
                         
                         imagePicker.delegate = self
                         imagePicker.sourceType = .camera
-                        (UIApplication.shared.delegate as? AppDelegate)?.window?.rootViewController?.present(imagePicker, animated: true, completion: nil)
+                        self.parentController?.present(imagePicker, animated: true, completion: nil)
                     }
             }, at: 0)
         }
