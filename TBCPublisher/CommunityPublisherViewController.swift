@@ -38,11 +38,9 @@ final class CommunityPublisherViewController: UIViewController {
         
         view.backgroundColor = .white
         title = "TBC Community"
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Full Screen", style: .plain, target: self, action: #selector(dismissKeyboard))
         navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelTapped))
         view.addSubview(publisherHelper.inputBar)
         keyboardManager.bind(inputAccessoryView: publisherHelper.inputBar)
-        
         view.addSubview(textView)
         NSLayoutConstraint.activate([
             textView.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
@@ -55,9 +53,6 @@ final class CommunityPublisherViewController: UIViewController {
         }
     }
     
-    @objc private func dismissKeyboard() {
-        textView.resignFirstResponder()
-    }
     @objc private func cancelTapped() {
         dismiss(animated: true, completion: nil)
     }
