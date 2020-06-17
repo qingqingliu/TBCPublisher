@@ -1,5 +1,5 @@
 //
-//  CommunityPublisherBaseViewController.swift
+//  CommunityPublisherHelper.swift
 //  TBCPublisher
 //
 //  Created by Qingqing Liu on 6/17/20.
@@ -9,21 +9,18 @@
 import InputBarAccessoryView
 import UIKit
 
-/// Base class for CommunityPublisherBaseViewController
-open class CommunityPublisherBaseViewController: UIViewController {
+/// Main helper class for community publisher
+class CommunityPublisherHelper: NSObject {
     // MARK: - Properties
-    
-    let conversation: SampleData.Conversation
     let inputBar: CommunityInputBar
-    lazy var keyboardManager = KeyboardManager()
+    let textView: UITextView?
+    let userLookup: CommunityUserLookupHelper
     
-    lazy var textView: UITextView = {
-        let view = UITextView()
-        view.textContainer.lineFragmentPadding = 4.0
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.textContainerInset = UIEdgeInsets(top: 8.0, left: 8.0, bottom: 8.0, right: 8.0)
-        return view
-    }()
+    weak var parentController: UIViewController? {
+        didSet {
+            inputBar.parentController = self.parentController
+        }
+    }
     
     /// The object that manages attachments
     lazy var attachmentManager: AttachmentManager = { [unowned self] in
@@ -51,20 +48,15 @@ open class CommunityPublisherBaseViewController: UIViewController {
     // Completions loaded async that get appeneded to local cached completions
     var asyncCompletions: [AutocompleteCompletion] = []
     
-    init(conversation: SampleData.Conversation,inputBarStyle: Bool) {
-        self.conversation = conversation
+    init(inputBarStyle: Bool, inputTextView: UITextView?, userLookup: CommunityUserLookupHelper = CommunityUserLookupHelper()) {
+        self.textView = inputTextView
         self.inputBar = CommunityInputBar(inputBarStyle: inputBarStyle)
-        super.init(nibName: nil, bundle: nil)
-        inputBar.parentController = self
+        self.userLookup = userLookup
+        super.init()
         inputBar.attachmentInputDelegate = self
     }
     
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override open func viewDidLoad() {
-        super.viewDidLoad()
+    func configureInputBar() {
         // Configure AutocompleteManager
         autocompleteManager.register(prefix: "@", with: [.font: UIFont.preferredFont(forTextStyle: .body),.foregroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 1),.backgroundColor: UIColor(red: 0, green: 122/255, blue: 1, alpha: 0.1)])
         autocompleteManager.register(prefix: "#")
@@ -75,11 +67,11 @@ open class CommunityPublisherBaseViewController: UIViewController {
     }
     
     open func textViewForAutoCompletion() -> UITextView {
-        return self.textView
+        return self.textView ?? inputBar.inputTextView
     }
 }
 
-extension CommunityPublisherBaseViewController: AttachmentManagerDelegate {
+extension CommunityPublisherHelper: AttachmentManagerDelegate {
     // MARK: - AttachmentManagerDelegate
     
     public func attachmentManager(_ manager: AttachmentManager, shouldBecomeVisible: Bool) {
@@ -104,7 +96,7 @@ extension CommunityPublisherBaseViewController: AttachmentManagerDelegate {
             let imagePicker = UIImagePickerController()
             imagePicker.delegate = self
             imagePicker.sourceType = .photoLibrary
-            present(imagePicker, animated: true, completion: nil)
+            parentController?.present(imagePicker, animated: true, completion: nil)
         }
     }
     
@@ -123,17 +115,12 @@ extension CommunityPublisherBaseViewController: AttachmentManagerDelegate {
     }
 }
 
-extension CommunityPublisherBaseViewController: AutocompleteManagerDelegate, AutocompleteManagerDataSource {
+extension CommunityPublisherHelper: AutocompleteManagerDelegate, AutocompleteManagerDataSource {
     // MARK: - AutocompleteManagerDataSource
     
     public func autocompleteManager(_ manager: AutocompleteManager, autocompleteSourceFor prefix: String) -> [AutocompleteCompletion] {
         if prefix == "@" {
-            return conversation.users
-                .filter { $0.name != SampleData.shared.currentUser.name }
-                .map { user in
-                    AutocompleteCompletion(text: user.name,
-                                           context: ["id": user.id])
-                }
+            return userLookup.getUsers()
         } else if prefix == "#" {
             return hastagAutocompletes + asyncCompletions
         }
@@ -188,11 +175,11 @@ extension CommunityPublisherBaseViewController: AutocompleteManagerDelegate, Aut
     }
 }
 
-extension CommunityPublisherBaseViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+extension CommunityPublisherHelper: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let info = Dictionary(uniqueKeysWithValues: info.map { key, value in (key.rawValue, value) })
         
-        dismiss(animated: true, completion: {
+        parentController?.dismiss(animated: true, completion: {
             if let pickedImage = info[UIImagePickerController.InfoKey.originalImage.rawValue] as? UIImage {
                 let handled = self.attachmentManager.handleInput(of: pickedImage)
                 if !handled {
@@ -203,7 +190,7 @@ extension CommunityPublisherBaseViewController: UIImagePickerControllerDelegate,
     }
 }
 
-extension CommunityPublisherBaseViewController: CommunityInputBarDelegate {
+extension CommunityPublisherHelper: CommunityInputBarDelegate {
     func canAddAttachmentToInputBar(inputBar: CommunityInputBar) -> Bool {
         // support up to 3 attachment
         attachmentManager.attachments.count < 3
